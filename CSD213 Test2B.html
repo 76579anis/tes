@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html> 
+<head>
+    <style>
+        table {
+            text-align: center;
+            margin-left: 10%;
+            margin-right: 50%;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        input, button {
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        .error { border: 2px solid red; }
+        .valid { border: 2px solid white; }
+        .error-message { color: red; font-size: 0.9em; margin-left: 20px; }
+        .hidden { display: none; }
+        .success-message { font-size: 1.2em; margin-top: 20px; }
+        .error-container {
+            display: inline-block;
+            vertical-align: top;
+            text-align: left;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div align="center">
+        <h1>Booking your place for your dinner!</h1>  
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" size="22">
+        <br>
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" size="22" maxlength="6">
+        <br>  
+    </div>
+
+    <div align="center">
+        <h2>Select a time</h2>
+        <input type="radio" id="first" name="time" value="5" checked>
+        <label for="first">5:00</label><br>
+        <input type="radio" id="second" name="time" value="6">
+        <label for="second">6:00</label><br>
+        <input type="radio" id="third" name="time" value="7">
+        <label for="third">7:00</label><br>
+        <input type="radio" id="fourth" name="time" value="8">
+        <label for="fourth">8:00</label><br>
+        
+        <h2>What would you like to have with us?</h2>
+        <input type="checkbox" id="starters" name="starters" value="Starters">
+        <label for="starters">Starters</label><br>
+        <input type="checkbox" id="mainCourse" name="mainCourse" value="Main Course">
+        <label for="mainCourse">Main Course</label><br>
+        <input type="checkbox" id="dessert" name="dessert" value="Desserts">
+        <label for="dessert">Desserts</label><br>
+        <input type="checkbox" id="drinks" name="drinks" value="Drinks">
+        <label for="drinks">Drinks</label><br>
+    </div>
+
+    <div align="center">
+        <div class="error-container">
+            <span id="nameError" class="error-message hidden">Error: First and last names are required.</span>
+            <span id="nameEmptyError" class="error-message hidden">Error: Name is empty.</span><br>
+            <span id="phoneError" class="error-message hidden">Error: Phone numbers must have exactly 6 characters.</span>
+            <span id="phoneEmptyError" class="error-message hidden">Error: Phone number is empty.</span>
+            <span id="phoneStartError" class="error-message hidden">Error: Phone number must start with a number.</span>
+        </div>
+
+        <div>
+            <button id="submitBtn" disabled>Submit</button>...
+            <span id="formMessage" class="success-message hidden">Form submitted successfully!</span>
+            <p id="reservationSummary" class="hidden"></p>
+        </div>
+    </div>
+    
+    <script>
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const submitBtn = document.getElementById('submitBtn');
+        const nameError = document.getElementById('nameError');
+        const nameEmptyError = document.getElementById('nameEmptyError');
+        const phoneError = document.getElementById('phoneError');
+        const phoneEmptyError = document.getElementById('phoneEmptyError');
+        const phoneStartError = document.getElementById('phoneStartError');
+        const formMessage = document.getElementById('formMessage');
+        const reservationSummary = document.getElementById('reservationSummary');
+
+        function validateName() {
+            const nameValue = nameInput.value.trim();
+            const hasSpace = nameValue.includes(' ');
+            if (nameValue === '') {
+                nameInput.classList.add('error');
+                nameEmptyError.classList.remove('hidden');
+                nameError.classList.add('hidden');
+            } else if (!hasSpace) {
+                nameInput.classList.add('error');
+                nameError.classList.remove('hidden');
+                nameEmptyError.classList.add('hidden');
+            } else {
+                nameInput.classList.remove('error');
+                nameInput.classList.add('valid');
+                nameError.classList.add('hidden');
+                nameEmptyError.classList.add('hidden');
+            }
+        }
+
+        function validatePhone() {
+            const phoneValue = phoneInput.value.trim();
+            const startsWithNumber = /^\d/.test(phoneValue);
+
+            if (phoneValue === '') {
+                phoneInput.classList.add('error');
+                phoneEmptyError.classList.remove('hidden');
+                phoneError.classList.add('hidden');
+                phoneStartError.classList.add('hidden');
+            } else if (phoneValue.length !== 6) {
+                phoneInput.classList.add('error');
+                phoneError.classList.remove('hidden');
+                phoneEmptyError.classList.add('hidden');
+                phoneStartError.classList.add('hidden');
+            } else if (!startsWithNumber) {
+                phoneInput.classList.add('error');
+                phoneStartError.classList.remove('hidden');
+                phoneError.classList.add('hidden');
+                phoneEmptyError.classList.add('hidden');
+            } else {
+                phoneInput.classList.remove('error');
+                phoneInput.classList.add('valid');
+                phoneError.classList.add('hidden');
+                phoneEmptyError.classList.add('hidden');
+                phoneStartError.classList.add('hidden');
+            }
+        }
+
+        function enableSubmitButton() {
+            const nameValid = nameInput.value.trim().includes(' ') && nameInput.value.trim() !== '';
+            const phoneValid = phoneInput.value.trim().length === 6 && /^\d/.test(phoneInput.value.trim());
+            if (nameValid && phoneValid) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        function getSelectedTime() {
+            const timeElements = document.getElementsByName('time');
+            for (const timeElement of timeElements) {
+                if (timeElement.checked) {
+                    return timeElement.value;
+                }
+            }
+            return '';
+        }
+
+        function getSelectedItems() {
+            const items = [];
+            if (document.getElementById('starters').checked) items.push('Starters');
+            if (document.getElementById('mainCourse').checked) items.push('Main Course');
+            if (document.getElementById('dessert').checked) items.push('Desserts');
+            if (document.getElementById('drinks').checked) items.push('Drinks');
+            return items.join(', ');
+        }
+
+        submitBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            const nameValue = nameInput.value.trim();
+            const phoneValue = phoneInput.value.trim();
+            const timeValue = getSelectedTime();
+            const items = getSelectedItems();
+            
+            // Check if items are empty
+            const itemsDisplay = items !== '' ? items : 'No items selected';
+
+            // Display the reservation summary
+            reservationSummary.innerHTML = `Reservation for: ${nameValue} Phone: (${phoneValue}) at ${timeValue}:00 Starters are: ${itemsDisplay}`;
+            reservationSummary.classList.remove('hidden');
+            formMessage.classList.remove('hidden');
+            alert("Form Submitted!");
+        });
+
+        nameInput.addEventListener('blur', () => {
+            validateName();
+            enableSubmitButton();
+        });
+
+        phoneInput.addEventListener('blur', () => {
+            validatePhone();
+            enableSubmitButton();
+        });
+    </script>
+</body> 
+</html>
+
